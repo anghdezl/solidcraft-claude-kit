@@ -1,0 +1,12 @@
+{
+  "titulo": "Pieza de ejemplo v0.1",
+  "descripcion": "Parche circular de 3 colores. Negro (ranura 1), blanco (2), amarillo (3). Cambia las ranuras a las del ACE del usuario.",
+  "carpeta_stl": "../../salida/pieza_ejemplo",
+  "prefijo": "pieza_ejemplo_v0.1_",
+  "salida": "pieza_ejemplo_v0.1.3mf",
+  "partes": [
+    ["F1_negro.stl", "Negro", 1],
+    ["F2_blanco.stl", "Blanco", 2],
+    ["F3_amarillo.stl", "Amarillo", 3]
+  ]
+}

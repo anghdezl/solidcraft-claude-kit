@@ -1,0 +1,7 @@
+{"salida":"prueba_ejecutor_v0.1.stl","pasos":[
+ ["loft","Torso",0,[[-5,95,47.2,13,21,-2],[4,104.6,47.2,19,29,-1]]],
+ ["seg","PH_muslo",14,[2,108],[20,78],16,19,11,12],
+ ["esfera","PH_corvejon",[-4,14,48],7.5],
+ ["union","PH_muslo",["PH_corvejon"]],
+ ["espejo",["PH_muslo"]],
+ ["elipse_extruida","Peana",[10,0],98,46,6]]}

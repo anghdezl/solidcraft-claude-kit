@@ -1,0 +1,6 @@
+{
+  "solidcraft": {
+    "command": "C:\\Program Files\\SolidCraft\\solidcraft-cli.EXE",
+    "args": ["mcp", "--allow-path", "CARPETA_DEL_USUARIO_QUE_CONTIENE_solidcraft"]
+  }
+}

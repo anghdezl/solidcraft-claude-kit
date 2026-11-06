@@ -1,0 +1,16 @@
+# Datos locales: no subir
+docs/ESTADO_LOCAL.md
+kit/solidcraft/salida/
+kit/solidcraft/sistema/logs/
+kit/solidcraft/sistema/resultados/
+kit/solidcraft/sistema/trabajos/
+kit/solidcraft/sistema/salida/
+kit/solidcraft/sistema/*.json
+!kit/solidcraft/sistema/claude_desktop_config.snippet.json
+kit/solidcraft/sistema/*.pid
+kit/solidcraft/sistema/ordenes.txt
+kit/solidcraft/sistema/flag.*
+__pycache__/
+*.pyc
+*.sc
+.~*.sc.lock
