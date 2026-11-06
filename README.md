@@ -60,7 +60,7 @@ El kit solo registra un servidor MCP: `solidcraft` (viene en `solidcraft-cli`). 
 ## Uso rápido: "carga este repo"
 Si ya tienes la app de escritorio de Claude y la conversación enlazada a tu PC, basta con escribir:
 
-> Carga este repo y prepáralo todo: https://github.com/anghdezl/solidcraft-claude-kit
+> Carga este repo de GitHub y sigue las instrucciones: https://github.com/anghdezl/solidcraft-claude-kit
 
 Claude lee `LEEME_CLAUDE.md` y `PROMPT_PRINCIPAL.md`, trae el kit a tu carpeta conectada y te pide **una sola cosa que solo puedes hacer tú**: doble clic en `instalar_todo.bat` (instala Python/SolidCraft si faltan, registra el servidor en Claude Desktop y autoriza los scripts). Después reinicias Claude Desktop y sigues. Para que las instrucciones persistan entre conversaciones, pega el prompt en un proyecto (pasos abajo).
 Solo carga repos oficiales: un fork puede contener instrucciones que no son tuyas.
