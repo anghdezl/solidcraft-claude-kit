@@ -1,0 +1,38 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  pruebas:
+    name: Pruebas (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compilar todos los .py
+        run: python -m compileall -q kit tests
+      - name: Validar JSON
+        run: python -c "import json,glob; [json.load(open(f,encoding='utf-8')) for f in glob.glob('**/*.json',recursive=True)]; print('JSON valido')"
+      - name: Pruebas unitarias
+        run: python -m unittest discover -v -s tests
+  windows-instalador:
+    name: Instalador en Windows limpio (solo diagnostico)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ejecutar diagnostico (no instala nada ni toca la configuracion)
+        shell: cmd
+        run: |
+          call kit\solidcraft\instalar_entorno.bat diagnostico
+          if not exist kit\solidcraft\sistema\logs\instalar_entorno.log exit /b 1
+          type kit\solidcraft\sistema\logs\instalar_entorno.log
+          exit /b 0

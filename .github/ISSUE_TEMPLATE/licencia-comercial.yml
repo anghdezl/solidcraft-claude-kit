@@ -1,0 +1,13 @@
+name: Licencia comercial
+description: Mi empresa supera el umbral de PolyForm Small Business y quiere una licencia
+labels: [comercial]
+body:
+  - type: markdown
+    attributes: {value: "No incluyas datos confidenciales ni contactos personales en este issue público; indica solo una vía para que te respondan por GitHub."}
+  - type: input
+    id: empresa
+    attributes: {label: Tipo de organización (no hace falta el nombre)}
+  - type: textarea
+    id: uso
+    attributes: {label: Para qué quieres usar el kit}
+    validations: {required: true}

@@ -1,10 +1,47 @@
+<div align="center">
+
 # solidcraft-claude-kit
 
-Kit para que Claude diseñe piezas 3D con **SolidCraft** (CAD paramétrico de código abierto), las exporte a 3MF multicolor y las lamine en tu laminador, controlando tu PC Windows desde una sesión de Claude Desktop.
+**Agente de diseño 3D con Claude: de una foto a una pieza multicolor laminada, sin tocar el CAD.**
 
-Contiene: el **prompt principal** (instrucciones del proyecto de Claude), la **documentación** que Claude consulta bajo demanda (lecciones, API, recetas) y los **scripts de arranque** (`lanzar_todo.bat`, ejecutor, demonio de órdenes, generador de 3MF).
+[![CI](https://img.shields.io/github/actions/workflow/status/anghdezl/solidcraft-claude-kit/ci.yml?branch=main&label=CI)](https://github.com/anghdezl/solidcraft-claude-kit/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/anghdezl/solidcraft-claude-kit?include_prereleases)](https://github.com/anghdezl/solidcraft-claude-kit/releases)
+[![Licencia](https://img.shields.io/badge/licencia-PolyForm%20Small%20Business-blue)](LICENSE)
+[![Gratis para particulares](https://img.shields.io/badge/particulares-gratis-brightgreen)](COMMERCIAL.md)
+[![Último commit](https://img.shields.io/github/last-commit/anghdezl/solidcraft-claude-kit)](https://github.com/anghdezl/solidcraft-claude-kit/commits/main)
+[![Stars](https://img.shields.io/github/stars/anghdezl/solidcraft-claude-kit?style=social)](https://github.com/anghdezl/solidcraft-claude-kit/stargazers)
+[![Issues](https://img.shields.io/github/issues/anghdezl/solidcraft-claude-kit)](https://github.com/anghdezl/solidcraft-claude-kit/issues)
+![Plataforma](https://img.shields.io/badge/Windows-10%2F11-lightgrey)
 
-> Origen: sale de un proyecto real con una Anycubic Kobra S1 + ACE y Anycubic Slicer Next. Lo que no es de esa máquina está marcado como "no verificado" en los docs.
+[Cómo funciona](#cómo-funciona) · [Instalación](#instalación-10-15-minutos) · [FAQ](#preguntas-frecuentes) · [Seguridad](#seguridad-léelo) · [Hoja de ruta](#hoja-de-ruta) · [Licencia](#licencia)
+
+</div>
+
+> **Estado: v0.1.0, fase de pruebas.** Sale de un proyecto real (Anycubic Kobra S1 + ACE y Anycubic Slicer Next), pero la instalación en otros PC aún no está validada. Lo no probado está marcado como tal. Mira [qué NO está verificado](#qué-no-está-verificado).
+
+## Qué es
+Un **Project de Claude** con instrucciones (`PROMPT_PRINCIPAL.md`) más un **kit local** (instalador, lanzadores y scripts) que convierten a Claude en un agente de diseño 3D:
+
+1. Le mandas una **foto** de la pieza y alguna cota.
+2. Te hace **hasta 3 preguntas** cerradas.
+3. Modela en **[SolidCraft](https://github.com/tangency-labs/solidcraft)** (CAD paramétrico) a través de su servidor MCP, en una ventana que ves en directo.
+4. Exporta `.sc`, STL por color y un **3MF multicolor**, ordenados en `salida\<pieza>\` con versión.
+5. Abre tu **laminador** con control de pantalla, comprueba filamento por parte, lamina… y **se detiene antes de imprimir**. La orden de imprimir es tuya.
+6. Recuerda el proyecto entre conversaciones (`GUARDA PROYECTO`): ajustes confirmados, piezas, filamentos.
+
+No es un agente autónomo aparte: es Claude Desktop en tu PC con las instrucciones y las herramientas adecuadas.
+
+## Cómo funciona
+```mermaid
+flowchart LR
+    F[Foto + cotas] --> C[Claude Desktop<br/>Project + prompt]
+    C -->|MCP| S[SolidCraft<br/>modelado]
+    S --> E[STL por color + .sc]
+    E --> T[build_3mf.py<br/>3MF multiparte]
+    T --> L[Laminador<br/>control de pantalla]
+    L --> P{{Tu orden:<br/>Iniciar impresión}}
+    C -.->|GUARDA PROYECTO| M[(Memoria del proyecto)]
+```
 
 ## Requisitos
 | Requisito | Quién lo pone |
@@ -16,7 +53,7 @@ Contiene: el **prompt principal** (instrucciones del proyecto de Claude), la **d
 | Bloque `solidcraft` en la configuración de Claude Desktop | El instalador, con copia de seguridad y solo tras tu confirmación |
 | Laminador + impresora (probado: Anycubic Slicer Next 2.0.0.3, Kobra S1, ACE) | Tú (descarga del fabricante) |
 | Un **proyecto** de Claude con el prompt pegado y la conversación abierta **en la app de escritorio de este PC** | Tú: es lo que da a Claude el control de ficheros, SolidCraft y pantalla |
-| Git (opcional) | Solo para clonar/publicar el repo |
+| Git (opcional) | Solo para clonar el repo |
 
 El kit solo registra un servidor MCP: `solidcraft` (viene en `solidcraft-cli`). En el PC de origen Claude Desktop tiene además un servidor `Filesystem` activo; no se ha comprobado si el flujo lo necesita (el acceso a ficheros y shell funcionó con la carpeta conectada). Si tu app pide activar el control del ordenador o conceder acceso a una carpeta, acéptalo: esos avisos no se pueden automatizar y cómo se activan en tu versión no está verificado aquí.
 
@@ -66,14 +103,56 @@ Ver `PROMPT_PRINCIPAL.md`, sección 7. Resumen: otras rutas de instalación, otr
 
 ## Estructura
 ```
+LICENSE, COMMERCIAL.md, SECURITY.md, CONTRIBUTING.md, CHANGELOG.md, VERSION
 LEEME_CLAUDE.md          -> qué hace Claude al recibir la URL del repo
 instalar_todo.bat        -> asistente de instalación (doble clic)
 PROMPT_PRINCIPAL.md      -> instrucciones del proyecto de Claude
 docs\                    -> conocimiento que Claude lee bajo demanda (índice en 00-indice.md)
+tests\                   -> pruebas unitarias (CI)
 kit\solidcraft\          -> se copia a tu carpeta de trabajo
   lanzar_todo.bat, parar_todo.bat
   sistema\               -> ejecutor, demonio de órdenes, build_3mf.py, batería y pruebas de API
 ```
 
+## Preguntas frecuentes
+**¿Es gratis?** Para particulares y negocios pequeños, sí; ver [Licencia](#licencia). SolidCraft, Python y Claude tienen sus propias condiciones (Claude Desktop necesita cuenta de Claude).
+
+**¿Funciona en Mac o Linux?** El kit está pensado para Windows 10/11. No se ha probado en otros sistemas.
+
+**¿Funciona con otras impresoras o laminadores?** El modelado y el 3MF no dependen de la impresora, pero la secuencia de laminado solo se ha practicado con Anycubic Slicer Next. Otros: sin verificar.
+
+**¿Imprime solo?** No. Claude se detiene antes de "Iniciar impresión" por regla del prompt; compruébalo siempre en la vista previa.
+
+**¿Es seguro darle control del PC?** Lee [Seguridad](#seguridad-léelo) y [SECURITY.md](SECURITY.md). Úsalo en una carpeta de trabajo dedicada y, si puedes, primero en una máquina virtual (ver [docs/PROBAR_EN_LIMPIO.md](docs/PROBAR_EN_LIMPIO.md)).
+
+**¿Qué pasa si SolidCraft cambia?** Probado con la versión 0.27.1. Versiones nuevas pueden romper la API: abre un issue.
+
+## Hoja de ruta
+- [ ] Validar el instalador en Windows limpio (en curso).
+- [ ] Documentar la secuencia de clics del laminador con capturas.
+- [ ] Soporte y pruebas con otros laminadores/impresoras.
+- [ ] Versión en inglés de README y documentación (cuando la española esté cerrada).
+- [ ] Más recetas de pieza (ver `docs/`).
+
+## Contribuir y soporte
+Empieza por [CONTRIBUTING.md](CONTRIBUTING.md) y los [issues](https://github.com/anghdezl/solidcraft-claude-kit/issues). El mayor valor ahora: informes de prueba en otras máquinas. Historial en [CHANGELOG.md](CHANGELOG.md). Es un proyecto personal sin garantía de respuesta.
+
 ## Licencia
-Sin licencia todavía: por defecto, todos los derechos reservados y nadie puede reutilizarlo legalmente. Añade un `LICENSE` (por ejemplo MIT) antes de compartirlo. SolidCraft tiene su propia licencia.
+[PolyForm Small Business 1.0.0](LICENSE) © 2026 Lito (anghdezl). Es una licencia de **código disponible** (no es de código abierto según la OSI):
+- **Gratis** para particulares y para negocios con menos de 100 personas y menos de 1.000.000 USD de ingresos (umbral ajustado por inflación; el texto de la licencia manda).
+- **Empresas que superen el umbral:** necesitan licencia comercial, ver [COMMERCIAL.md](COMMERCIAL.md).
+- SolidCraft (MIT o Apache-2.0) y el resto de programas conservan sus propias licencias.
+
+## Siglas
+| Sigla | Significado |
+|---|---|
+| CAD | Diseño asistido por ordenador |
+| MCP | Model Context Protocol: conecta herramientas a Claude |
+| 3MF | Formato de archivo 3D con varias partes y color |
+| STL | Formato de malla 3D |
+| ACE | Caja de filamento multicolor de Anycubic |
+| CI | Integración continua (pruebas automáticas en GitHub) |
+| OSI | Open Source Initiative |
+| MSIX | Formato de paquete de Windows con configuración virtualizada |
+
+Más siglas en [docs/99-glosario.md](docs/99-glosario.md).

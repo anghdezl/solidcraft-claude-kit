@@ -10,6 +10,7 @@ Carga **solo** el doc que pida la tarea. Reglas generales y flujo: `PROMPT_PRINC
 | `54-solidcraft-organico.md` | Piezas orgánicas (lofts), límites medidos, ejecutor local | Modelar algo orgánico o con muchas piezas |
 | `56-solidcraft-api.md` | Fallos conocidos de la API, nombres de parámetros, coste en tokens, regla de diseño | Antes de modelar o si una llamada falla |
 | `58-imagen-a-pieza-multicolor.md` | Receta imagen → relieve multicolor por capas (llaveros, parches) | Convertir una imagen plana en pieza |
+| `PROBAR_EN_LIMPIO.md` | Lista de pasos para probar el kit en un Windows limpio | Quieres validar la instalación o reportar un fallo |
 | `99-glosario.md` | Siglas y términos | Aparece una sigla |
 
 Estado local de cada usuario (impresora, ranuras, pruebas): `docs\ESTADO_LOCAL.md` (lo crea Claude en el arranque inicial; **no se sube al repo**).

@@ -1,0 +1,25 @@
+name: Error / Bug
+description: Algo no funciona como dice la documentación
+labels: [bug]
+body:
+  - type: textarea
+    id: que
+    attributes: {label: Qué ha pasado y qué esperabas, description: Una o dos frases}
+    validations: {required: true}
+  - type: textarea
+    id: pasos
+    attributes: {label: Pasos para reproducirlo}
+    validations: {required: true}
+  - type: input
+    id: win
+    attributes: {label: Versión de Windows y de Claude Desktop}
+    validations: {required: true}
+  - type: input
+    id: sc
+    attributes: {label: Versión de SolidCraft y laminador/impresora}
+  - type: textarea
+    id: log
+    attributes:
+      label: Log (solidcraft\sistema\logs\instalar_entorno.log o lanzar_todo.log)
+      description: Revisa que no lleve tu nombre de usuario ni rutas privadas antes de pegarlo
+      render: text

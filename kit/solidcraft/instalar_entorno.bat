@@ -25,4 +25,4 @@ goto fin
 %PY% "%~dp0sistema\instalar_entorno.py" %ACCION% %2 %3 %4 %5 %6
 :fin
 echo.
-pause
+if not defined CI pause

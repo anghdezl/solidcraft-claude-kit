@@ -1,0 +1,11 @@
+name: Idea / Mejora
+description: Propón una mejora o una pieza/receta nueva
+labels: [enhancement]
+body:
+  - type: textarea
+    id: que
+    attributes: {label: Qué quieres conseguir y por qué}
+    validations: {required: true}
+  - type: textarea
+    id: alt
+    attributes: {label: Cómo lo haces ahora o alternativas}

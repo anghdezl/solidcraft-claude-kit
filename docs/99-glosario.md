@@ -26,3 +26,9 @@
 | UAC | Control de cuentas de usuario: el aviso de Windows al instalar programas |
 | SmartScreen | Filtro de Windows que avisa ante instaladores sin firmar |
 | MSI | Formato de instalador de Windows |
+| CI | Integración continua: GitHub ejecuta las pruebas automáticamente en cada cambio |
+| SemVer | Versionado semántico `MAYOR.MENOR.PARCHE` (0.1.0 → 0.1.1 corrección, 0.2.0 función nueva) |
+| CLA | Acuerdo de licencia de contribuyente: lo que aceptas al enviar código al repo |
+| PolyForm | Familia de licencias de código disponible; "Small Business" = gratis para particulares y empresas pequeñas |
+| PR | Pull request: propuesta de cambio en GitHub |
+| SHA-256 | Huella (hash) de un fichero; el demonio solo ejecuta scripts cuya huella autorizaste |
