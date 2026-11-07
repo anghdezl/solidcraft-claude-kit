@@ -4,6 +4,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); v
 
 ## [Sin publicar]
 ### Corregido
+- Instalador: un bloque `solidcraft` ya existente que solo difiere en mayúsculas o `/` frente a `\\` se considera correcto en Windows (antes pedía `--sobrescribir` sin motivo).
+- Demonio: al autorizar scripts, si no escribes `SI` exacto avisa de que NO se ha autorizado.
+- Instalador: muestra el progreso de la descarga del MSI.
 - Instalador: si Python no valida el certificado de GitHub (Windows recién instalado, `CERTIFICATE_VERIFY_FAILED`), la descarga se reintenta con `curl.exe`/PowerShell, que usan el almacén de certificados de Windows. La verificación TLS nunca se desactiva. Hallado en la VM.
 - Instalador: SolidCraft se instalaba con un ID de winget (`bherbruck.SolidCraft`) que **no está verificado** y falló en la VM (`winget` no lo encuentra). Ahora descarga el MSI oficial fijado a la 0.27.1 (la probada), muestra su sha256 y lo ejecuta con `msiexec`, con confirmación.
 - Instalador: ya no falla (WinError 32) si se elige como carpeta de trabajo la del propio repo; la rechaza con un aviso y propone la carpeta que lo contiene. Hallado en la primera prueba en VM.

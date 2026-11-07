@@ -68,6 +68,17 @@ class Configurar(unittest.TestCase):
         self.cfg.write_text(json.dumps({"mcpServers": []}), encoding="utf-8")
         self.assertEqual(self.run_cfg(aplicar=True), 1)
 
+    def test_mayusculas_en_ruta_son_equivalentes_en_windows(self):
+        from unittest import mock
+        self.cfg.write_text(json.dumps({"mcpServers": {"solidcraft": {
+            "command": CLI.replace("solidcraft-cli.exe", "SOLIDCRAFT-CLI.EXE").replace("\\", "/"),
+            "args": ["mcp", "--allow-path", TRABAJO.lower()]}}}), encoding="utf-8")
+        antes = self.cfg.read_text(encoding="utf-8")
+        with mock.patch.object(ie, "ES_WIN", True):
+            self.assertEqual(self.run_cfg(aplicar=True), 0)
+        self.assertEqual(antes, self.cfg.read_text(encoding="utf-8"))      # no la reescribe
+        self.assertEqual(len(list(self.d.glob("*.bak-*"))), 0)
+
     def test_sin_cli(self):
         self.assertEqual(ie.configurar(None, TRABAJO, ruta_forzada=str(self.cfg)), 1)
 

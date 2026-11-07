@@ -144,9 +144,12 @@ def autorizar(nombres):
         p = BASE / n
         if not p.is_file(): print("no existe", n); continue
         print("%s  sha256=%s  %d bytes  %s" % (n, sha(p)[:16], p.stat().st_size, time.strftime("%d/%m/%Y %H:%M", time.localtime(p.stat().st_mtime))))
-        if input("  ¿Autorizar este contenido? Escribe SI: ").strip() == "SI":
+        r = input("  ¿Autorizar este contenido? Escribe SI (las dos letras, en mayusculas; cualquier otra cosa = no): ").strip()
+        if r == "SI":
             with open(AUTH, "a", encoding="utf-8") as f: f.write("%s  %s  %s\n" % (sha(p), n, now()))
             print("  autorizado")
+        else:
+            print("  NO autorizado (escribiste %r; hace falta SI)" % r)
 def main(relevo=False):
     global SALIR
     if relevo: time.sleep(4)

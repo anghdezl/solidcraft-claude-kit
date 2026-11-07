@@ -143,6 +143,21 @@ def bloque_esperado(cli, trabajo):
     return {"command": cli, "args": ["mcp", "--allow-path", str(trabajo)]}
 
 
+def _norm(v):
+    """En Windows las rutas no distinguen mayusculas ni / de \\: 'solidcraft-cli.exe' y '.EXE' son el mismo fichero."""
+    if isinstance(v, str):
+        return v.lower().replace("/", "\\") if ES_WIN else v
+    if isinstance(v, list):
+        return [_norm(x) for x in v]
+    if isinstance(v, dict):
+        return {k: _norm(x) for k, x in v.items()}
+    return v
+
+
+def bloques_equivalentes(a, b):
+    return _norm(a) == _norm(b)
+
+
 def cargar_config(ruta):
     if not ruta.exists():
         return {}
@@ -183,7 +198,7 @@ def configurar(cli, trabajo, ruta_forzada=None, aplicar=False, sobrescribir=Fals
         rec("FAIL", "config", "'mcpServers' no es un objeto en %s; no se modifica" % ruta)
         return 1
     actual = (servidores or {}).get(SERVER)
-    if actual == nuevo:
+    if actual is not None and bloques_equivalentes(actual, nuevo):
         rec("OK", "config", "%s ya contiene el bloque correcto (%s)" % (ruta, motivo))
         return 0
     if actual is not None and not sobrescribir:
