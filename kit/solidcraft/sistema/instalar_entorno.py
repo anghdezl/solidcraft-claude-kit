@@ -281,7 +281,7 @@ def descargar_con_windows(url, destino):
     Sirve cuando Python no confia en el certificado (Windows recien instalado: aun no ha bajado las raices). La verificacion TLS sigue activa."""
     curl = shutil.which("curl")
     if curl:
-        rc = subprocess.call([curl, "-sS", "-L", "-f", "-m", "900", "-o", str(destino), url])
+        rc = subprocess.call([curl, "-S", "-L", "-f", "--progress-bar", "-m", "900", "-o", str(destino), url])
         if rc == 0:
             return
     ps = shutil.which("powershell")
@@ -299,6 +299,9 @@ def descargar(url, destino, tam_min=1_000_000):
         h = hashlib.sha256()
         n = 0
         with urllib.request.urlopen(url, timeout=60) as r, open(destino, "wb") as f:
+            total = int(r.headers.get("Content-Length") or 0)
+            log("Descargando%s... (puede tardar unos minutos; no cierres la ventana)" % (" %.0f MB" % (total / 1e6) if total else ""))
+            siguiente = 10 << 20
             while True:
                 trozo = r.read(1 << 20)
                 if not trozo:
@@ -306,6 +309,9 @@ def descargar(url, destino, tam_min=1_000_000):
                 f.write(trozo)
                 h.update(trozo)
                 n += len(trozo)
+                if n >= siguiente:
+                    log("  ...%d MB%s" % (n >> 20, " de %d" % (total >> 20) if total else ""))
+                    siguiente += 10 << 20
     except (ssl.SSLError, urllib.error.URLError) as e:
         motivo = getattr(e, "reason", e)
         if not isinstance(motivo, ssl.SSLError):
