@@ -72,6 +72,35 @@ class Configurar(unittest.TestCase):
         self.assertEqual(ie.configurar(None, TRABAJO, ruta_forzada=str(self.cfg)), 1)
 
 
+class CarpetaTrabajo(unittest.TestCase):
+    def setUp(self):
+        self.base = Path(tempfile.mkdtemp())
+        self.repo = self.base / "solidcraft-claude-kit"
+        (self.repo / "kit" / "solidcraft" / "sistema").mkdir(parents=True)
+        (self.repo / "kit" / "solidcraft" / "lanzar_todo.bat").write_text("x", encoding="utf-8")
+        (self.repo / "docs").mkdir()
+        (self.repo / "docs" / "00-indice.md").write_text("i", encoding="utf-8")
+        (self.repo / "PROMPT_PRINCIPAL.md").write_text("p", encoding="utf-8")
+
+    def test_repo_o_dentro_son_invalidos(self):
+        self.assertIsNotNone(ie.trabajo_invalido(self.repo, self.repo))
+        self.assertIsNotNone(ie.trabajo_invalido(self.repo, self.repo / "sub"))
+
+    def test_padre_y_otra_carpeta_son_validos(self):
+        self.assertIsNone(ie.trabajo_invalido(self.repo, self.base))
+        self.assertIsNone(ie.trabajo_invalido(self.repo, self.base / "otra"))
+
+    def test_copiar_kit_en_la_carpeta_padre(self):
+        ie.copiar_kit(self.repo, self.base)
+        self.assertTrue((self.base / "solidcraft" / "lanzar_todo.bat").exists())
+        self.assertTrue((self.base / "docs" / "00-indice.md").exists())
+        self.assertTrue((self.base / "solidcraft" / "salida").is_dir())
+
+    def test_copiar_kit_no_falla_si_destino_es_el_repo(self):
+        ie.copiar_kit(self.repo, self.repo)      # defensa extra: no debe lanzar excepcion
+        self.assertTrue((self.repo / "docs" / "00-indice.md").exists())
+
+
 def stl_binario(ruta, tris):
     with open(ruta, "wb") as f:
         f.write(b"\0" * 80 + struct.pack("<I", len(tris)))

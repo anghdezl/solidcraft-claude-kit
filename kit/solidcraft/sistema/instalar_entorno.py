@@ -287,14 +287,28 @@ def instalar():
 
 
 # ---------------------------------------------------------------- asistente
+def trabajo_invalido(raiz, trabajo):
+    """Devuelve un texto de error si la carpeta de trabajo es el propio repo o esta dentro de el; si no, None."""
+    try:
+        r, t = Path(raiz).resolve(), Path(trabajo).resolve()
+    except OSError:
+        return None
+    if t == r or r in t.parents:
+        return ("la carpeta de trabajo no puede ser la del repo ni estar dentro de ella (%s). "
+                "Elige la carpeta que CONTIENE al repo (por ejemplo %s) o una nueva." % (r, r.parent))
+    return None
+
+
 def copiar_kit(origen_raiz, destino):
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", "logs", "resultados", "salida", "trabajos", "*.pid", "flag.*")
     for rel in ("kit/solidcraft", "docs"):
         src = origen_raiz / rel
         dst = destino / ("solidcraft" if rel.endswith("solidcraft") else "docs")
+        if src.resolve() == dst.resolve():
+            continue
         shutil.copytree(str(src), str(dst), ignore=ign, dirs_exist_ok=True)
     for f in ("PROMPT_PRINCIPAL.md", "README.md"):
-        if (origen_raiz / f).exists():
+        if (origen_raiz / f).exists() and (origen_raiz / f).resolve() != (destino / f).resolve():
             shutil.copy2(str(origen_raiz / f), str(destino / f))
     (destino / "solidcraft" / "salida").mkdir(parents=True, exist_ok=True)
     (destino / "_obsoleto").mkdir(parents=True, exist_ok=True)
@@ -306,13 +320,31 @@ def asistente(args):
     hay_repo = (raiz / "kit" / "solidcraft").is_dir() and (raiz / "docs").is_dir()
     trabajo = Path(args.trabajo) if args.trabajo else None
     if hay_repo:
-        por_defecto = str(Path.home() / "ClaudeSolidCraft")
+        padre = raiz.parent
+        if padre.name.lower() in ("downloads", "descargas", "desktop", "escritorio") or padre == padre.parent:
+            por_defecto = str(Path.home() / "ClaudeSolidCraft")
+        else:
+            por_defecto = str(padre)               # la carpeta que contiene al repo (normalmente la que conecto Claude)
         if trabajo is None:
-            try:
-                r = input("Carpeta de trabajo (la que conectaras a Claude) [%s]: " % por_defecto).strip()
-            except EOFError:
-                r = ""
-            trabajo = Path(r or por_defecto)
+            for _ in range(3):
+                try:
+                    r = input("Carpeta de trabajo (la que conectaras a Claude, NO la del repo) [%s]: " % por_defecto).strip().strip('"')
+                except EOFError:
+                    r = ""
+                trabajo = Path(r or por_defecto)
+                err = trabajo_invalido(raiz, trabajo)
+                if not err:
+                    break
+                log("AVISO: " + err)
+                trabajo = None
+            if trabajo is None:
+                rec("FAIL", "copiar", "no se eligio una carpeta de trabajo valida")
+                return fin()
+        else:
+            err = trabajo_invalido(raiz, trabajo)
+            if err:
+                rec("FAIL", "copiar", err)
+                return fin()
         trabajo.mkdir(parents=True, exist_ok=True)
         copiar_kit(raiz, trabajo)
         rec("OK", "copiar", "kit copiado a %s (scripts nuevos o modificados se actualizan; tus salidas y logs no se tocan)" % trabajo)

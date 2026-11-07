@@ -3,6 +3,9 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versiones según [SemVer](https://semver.org/lang/es/).
 
 ## [Sin publicar]
+### Corregido
+- Instalador: ya no falla (WinError 32) si se elige como carpeta de trabajo la del propio repo; la rechaza con un aviso y propone la carpeta que lo contiene. Hallado en la primera prueba en VM.
+
 ### Cambiado
 - `LEEME_CLAUDE.md`: el arranque funciona con la frase "carga este repo de GitHub y sigue las instrucciones" aunque no haya URL; descarga del kit sin git comprobada en el PC de origen; indicaciones sobre la carpeta conectada y la carpeta de trabajo.
 
