@@ -22,6 +22,9 @@ SALIDA: sistema\logs\instalar_entorno.log (se sobrescribe en cada ejecucion), co
 Codigos: 0 correcto | 1 error | 2 hace falta una decision del usuario (p. ej. --sobrescribir).
 """
 import argparse
+import hashlib
+import tempfile
+import urllib.request
 import json
 import os
 import platform
@@ -35,8 +38,9 @@ VERSION = "0.1"
 AQUI = Path(__file__).resolve().parent                  # ...\solidcraft\sistema
 LOG_DIR = AQUI / "logs"
 LOG_FILE = LOG_DIR / "instalar_entorno.log"
-WINGET_ID = "bherbruck.SolidCraft"                      # confirmado en el README del proyecto
-MSI_URL = "https://github.com/tangency-labs/solidcraft/releases/latest/download/solidcraft-windows-x64.msi"
+SC_VERSION = "0.27.1"                                    # version probada con este kit (la ultima publicada puede cambiar la API)
+MSI_URL = "https://github.com/tangency-labs/solidcraft/releases/download/v%s/solidcraft-windows-x64.msi" % SC_VERSION
+MSI_ULTIMA = "https://github.com/tangency-labs/solidcraft/releases/latest/download/solidcraft-windows-x64.msi"
 SERVER = "solidcraft"
 CONTADOR = {"OK": 0, "WARN": 0, "FAIL": 0}
 ES_WIN = platform.system() == "Windows"
@@ -232,7 +236,7 @@ def diagnostico(trabajo, ruta_forzada=None):
         rc, out = ejecutar([w, "--version"], 20)
         rec("OK" if rc == 0 else "WARN", "winget", out.strip()[:40])
     else:
-        rec("WARN", "winget", "no esta en el PATH: SolidCraft se instala a mano con el MSI (%s)" % MSI_URL)
+        rec("WARN", "winget", "no esta en el PATH (no es necesario: SolidCraft se instala con su MSI)")
     cli, gui = buscar_exe("solidcraft-cli"), buscar_exe("solidcraft")
     if cli:
         rc, out = ejecutar([cli, "--version"], 20)
@@ -261,28 +265,51 @@ def diagnostico(trabajo, ruta_forzada=None):
     return cli
 
 
+def descargar(url, destino, tam_min=1_000_000):
+    """Descarga url en destino; devuelve (bytes, sha256). Lanza OSError/ValueError si falla o es demasiado pequeno."""
+    h = hashlib.sha256()
+    n = 0
+    with urllib.request.urlopen(url, timeout=60) as r, open(destino, "wb") as f:
+        while True:
+            trozo = r.read(1 << 20)
+            if not trozo:
+                break
+            f.write(trozo)
+            h.update(trozo)
+            n += len(trozo)
+    if n < tam_min:
+        raise ValueError("descarga demasiado pequena (%d bytes): no parece un instalador" % n)
+    return n, h.hexdigest()
+
+
 def instalar():
     if buscar_exe("solidcraft-cli") and buscar_exe("solidcraft"):
         rec("OK", "instalar", "SolidCraft ya esta instalado")
         return 0
-    w = shutil.which("winget")
-    if not w:
-        rec("FAIL", "instalar", "sin winget. Descarga e instala el MSI a mano: %s (Windows pedira confirmacion; "
-                                "no esta firmado: SmartScreen > Mas informacion > Ejecutar de todos modos)" % MSI_URL)
+    if not ES_WIN:
+        rec("FAIL", "instalar", "solo se puede instalar SolidCraft en Windows desde este asistente")
         return 1
-    rc, out = ejecutar([w, "show", "--id", WINGET_ID, "-e"], 60)
-    if rc != 0:
-        rec("FAIL", "instalar", "winget no encuentra %s (rc=%s). Usa el MSI: %s" % (WINGET_ID, rc, MSI_URL))
-        return 1
-    log("Se va a ejecutar: winget install --id %s -e  (puede salir el aviso de Control de cuentas de usuario)" % WINGET_ID)
-    if not preguntar("¿Instalar SolidCraft ahora?"):
+    log("SolidCraft %s (la version con la que se ha probado este kit) se instala con su MSI oficial:" % SC_VERSION)
+    log("  %s" % MSI_URL)
+    log("Es un instalador SIN FIRMAR: SmartScreen puede avisar (Mas informacion > Ejecutar de todos modos) y Windows pedira permiso (UAC).")
+    log("Si prefieres la ultima version (NO probada con este kit): %s" % MSI_ULTIMA)
+    if not preguntar("¿Descargar e instalar SolidCraft %s ahora?" % SC_VERSION):
         rec("WARN", "instalar", "omitido por el usuario")
         return 2
-    rc = subprocess.call([w, "install", "--id", WINGET_ID, "-e", "--accept-package-agreements", "--accept-source-agreements"])
+    msi = Path(tempfile.gettempdir()) / ("solidcraft-%s-windows-x64.msi" % SC_VERSION)
+    try:
+        n, sha = descargar(MSI_URL, msi)
+    except (OSError, ValueError) as e:
+        rec("FAIL", "instalar", "no se pudo descargar el MSI (%s). Descargalo a mano de %s y ejecutalo" % (e, MSI_URL))
+        return 1
+    log("Descargado: %s (%.1f MB) sha256=%s" % (msi, n / 1e6, sha))
+    log("Se ejecuta: msiexec /i \"%s\" /passive /norestart" % msi)
+    rc = subprocess.call(["msiexec", "/i", str(msi), "/passive", "/norestart"])
     if buscar_exe("solidcraft-cli"):
-        rec("OK", "instalar", "winget rc=%s; solidcraft-cli encontrado" % rc)
+        rec("OK", "instalar", "msiexec rc=%s; solidcraft-cli encontrado (sha256 del MSI: %s)" % (rc, sha))
         return 0
-    rec("FAIL", "instalar", "winget rc=%s y solidcraft-cli no aparece. Cierra y abre esta ventana (PATH) y repite; si sigue, usa el MSI: %s" % (rc, MSI_URL))
+    rec("FAIL", "instalar", "msiexec rc=%s y solidcraft-cli no aparece. Si cancelaste el aviso de Windows, repite; "
+                            "si no, cierra y abre esta ventana (PATH) y ejecuta de nuevo" % rc)
     return 1
 
 

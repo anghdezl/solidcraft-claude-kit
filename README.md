@@ -46,10 +46,10 @@ flowchart LR
 ## Requisitos
 | Requisito | Quién lo pone |
 |---|---|
-| Windows 10/11 (con `winget`, incluido en las versiones actualizadas) | Tú |
+| Windows 10/11 (con `winget` para instalar Python; si no lo tienes, instala Python a mano) | Tú |
 | App de escritorio de **Claude** instalada y con sesión iniciada ([claude.ai/download](https://claude.ai/download)) | Tú (el instalador no la instala) |
-| Python 3.8+ | El instalador, con tu confirmación (`winget install Python.Python.3.12`) |
-| [SolidCraft](https://github.com/tangency-labs/solidcraft) (probado 0.27.1) | El instalador, con tu confirmación (`winget install bherbruck.SolidCraft`, o el MSI si no hay winget). No está firmado: SmartScreen > "Más información" > "Ejecutar de todos modos" |
+| Python 3.8+ | El instalador, con tu confirmación (`winget install Python.Python.3.12`; verificado en una VM) |
+| [SolidCraft](https://github.com/tangency-labs/solidcraft) (probado 0.27.1) | El instalador, con tu confirmación: descarga el MSI oficial de la 0.27.1 y lo ejecuta. No está firmado: SmartScreen > "Más información" > "Ejecutar de todos modos" |
 | Bloque `solidcraft` en la configuración de Claude Desktop | El instalador, con copia de seguridad y solo tras tu confirmación |
 | Laminador + impresora (probado: Anycubic Slicer Next 2.0.0.3, Kobra S1, ACE) | Tú (descarga del fabricante) |
 | Un **proyecto** de Claude con el prompt pegado y la conversación abierta **en la app de escritorio de este PC** | Tú: es lo que da a Claude el control de ficheros, SolidCraft y pantalla |
@@ -86,7 +86,7 @@ Comandos útiles después: `solidcraft\instalar_entorno.bat diagnostico` (solo l
 |---|---|---|
 | `%LOCALAPPDATA%\Packages\Claude_*\LocalCache\Roaming\Claude\claude_desktop_config.json` (instalación MSIX/Store/winget; en instalaciones clásicas, `%APPDATA%\Claude\`) | Añade `mcpServers.solidcraft`; copia `.bak-FECHA` al lado | Restaura la copia o borra ese bloque |
 | `%APPDATA%\SolidCraftOrdenes\autorizados.txt` | Hashes de los scripts que el demonio puede lanzar | Borra el fichero |
-| Programas | Python y SolidCraft (solo si faltaban y aceptaste) | `winget uninstall` |
+| Programas | Python (winget) y SolidCraft (MSI) solo si faltaban y aceptaste | Desinstalar desde *Aplicaciones instaladas* de Windows |
 La app de Claude Desktop en MSIX lee la copia **virtualizada** de la configuración, no `%APPDATA%\Claude`; el botón *Editar configuración* puede abrir el fichero equivocado (incidencia documentada en el repositorio de Claude Code). El instalador usa la ruta que la app realmente lee.
 
 ## Uso diario

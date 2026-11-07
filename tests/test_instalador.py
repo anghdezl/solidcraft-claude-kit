@@ -101,6 +101,25 @@ class CarpetaTrabajo(unittest.TestCase):
         self.assertTrue((self.repo / "docs" / "00-indice.md").exists())
 
 
+class Descarga(unittest.TestCase):
+    def test_descargar_calcula_sha256_y_rechaza_pequenos(self):
+        import hashlib
+        d = Path(tempfile.mkdtemp())
+        origen = d / "x.bin"
+        origen.write_bytes(b"a" * 2_000_000)
+        n, sha = ie.descargar(origen.as_uri(), d / "copia.bin")
+        self.assertEqual(n, 2_000_000)
+        self.assertEqual(sha, hashlib.sha256(b"a" * 2_000_000).hexdigest())
+        pequeno = d / "p.bin"
+        pequeno.write_bytes(b"<html>")
+        with self.assertRaises(ValueError):
+            ie.descargar(pequeno.as_uri(), d / "c2.bin")
+
+    def test_msi_fijado_a_version_probada(self):
+        self.assertIn("v" + ie.SC_VERSION, ie.MSI_URL)
+        self.assertNotIn("latest", ie.MSI_URL)
+
+
 def stl_binario(ruta, tris):
     with open(ruta, "wb") as f:
         f.write(b"\0" * 80 + struct.pack("<I", len(tris)))

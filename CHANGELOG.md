@@ -4,6 +4,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); v
 
 ## [Sin publicar]
 ### Corregido
+- Instalador: SolidCraft se instalaba con un ID de winget (`bherbruck.SolidCraft`) que **no está verificado** y falló en la VM (`winget` no lo encuentra). Ahora descarga el MSI oficial fijado a la 0.27.1 (la probada), muestra su sha256 y lo ejecuta con `msiexec`, con confirmación.
 - Instalador: ya no falla (WinError 32) si se elige como carpeta de trabajo la del propio repo; la rechaza con un aviso y propone la carpeta que lo contiene. Hallado en la primera prueba en VM.
 
 ### Cambiado

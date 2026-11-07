@@ -52,7 +52,6 @@ SNIPPET_FILE = BASE / "claude_desktop_config.snippet.json"
 FLAG_STOP = BASE / "flag.stop"
 FLAG_CHECK = BASE / "flag.check"
 FLAG_INSTALL = BASE / "flag.install"
-WINGET_ID = "bherbruck.SolidCraft"
 BOX_VOLUME = 40 * 30 * 20           # mm3 de la caja de prueba (analitico)
 HEARTBEAT_S = 5
 
@@ -368,18 +367,7 @@ def step_install():
     if cli:
         rec("instalar", "SKIP", "ya instalado")
         return
-    w = shutil.which("winget")
-    if not w:
-        rec("instalar", "FAIL", "sin winget: instala a mano desde la pagina de releases")
-        return
-    log.info("instalando %s con winget (puede salir un aviso de UAC o de SmartScreen)", WINGET_ID)
-    rc, out = run_cmd([w, "install", "--id", WINGET_ID, "-e", "--accept-package-agreements",
-                       "--accept-source-agreements", "--silent"], timeout=1200, interruptible=False)
-    cli = step_detect()
-    if cli:
-        rec("instalar", "OK", "winget rc=%s; solidcraft-cli encontrado" % rc)
-    else:
-        rec("instalar", "FAIL", "winget rc=%s y solidcraft-cli no aparece (puede que el instalador no lo incluya; ver el log)" % rc)
+    rec("instalar", "FAIL", "SolidCraft no esta instalado: ejecuta instalar_todo.bat (descarga y lanza el MSI oficial, con tu confirmacion)")
 
 
 def check_version(cli):

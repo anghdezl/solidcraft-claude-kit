@@ -11,8 +11,8 @@ CAD paramétrico de código abierto en Rust: github.com/tangency-labs/solidcraft
 ## Ficheros de `sistema\`
 | Fichero | Para qué |
 |---|---|
-| `instalar_entorno.py` (+ `..\instalar_entorno.bat`) | Asistente: diagnóstico, instalación de SolidCraft (winget `bherbruck.SolidCraft` o MSI), configuración de Claude Desktop, autorización. Log `logs\instalar_entorno.log`. Sin probar en Windows limpio |
-| `instalar_solidcraft.py` | Instala (winget) si falta, hace comprobaciones y escribe log. Solo librería estándar |
+| `instalar_entorno.py` (+ `..\instalar_entorno.bat`) | Asistente: diagnóstico, instalación de SolidCraft (MSI oficial 0.27.1 o MSI), configuración de Claude Desktop, autorización. Log `logs\instalar_entorno.log`. Sin probar en Windows limpio |
+| `instalar_solidcraft.py` | Detecta si falta SolidCraft (se instala con `instalar_todo.bat`), hace comprobaciones y escribe log. Solo librería estándar |
 | `ejecutor_trabajos.py` | Vigila `trabajos\`, ejecuta con `solidcraft-cli`, escribe `resultados\` |
 | `demonio_ordenes.py` | Acciones de lista cerrada desde `ordenes.txt` (abajo) |
 | `comprobar_todo.py` | Comprobaciones de `lanzar_todo.bat` (`vivo ventana|ejecutor|ordenes`, `final`, `log`) |
