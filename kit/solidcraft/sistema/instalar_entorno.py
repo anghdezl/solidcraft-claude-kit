@@ -23,6 +23,8 @@ Codigos: 0 correcto | 1 error | 2 hace falta una decision del usuario (p. ej. --
 """
 import argparse
 import hashlib
+import ssl
+import urllib.error
 import tempfile
 import urllib.request
 import json
@@ -265,21 +267,58 @@ def diagnostico(trabajo, ruta_forzada=None):
     return cli
 
 
-def descargar(url, destino, tam_min=1_000_000):
-    """Descarga url en destino; devuelve (bytes, sha256). Lanza OSError/ValueError si falla o es demasiado pequeno."""
-    h = hashlib.sha256()
-    n = 0
-    with urllib.request.urlopen(url, timeout=60) as r, open(destino, "wb") as f:
-        while True:
-            trozo = r.read(1 << 20)
-            if not trozo:
-                break
-            f.write(trozo)
+def sha_y_tamano(ruta):
+    h, n = hashlib.sha256(), 0
+    with open(ruta, "rb") as f:
+        for trozo in iter(lambda: f.read(1 << 20), b""):
             h.update(trozo)
             n += len(trozo)
+    return n, h.hexdigest()
+
+
+def descargar_con_windows(url, destino):
+    """Descarga con las herramientas de Windows (curl.exe o PowerShell), que usan el almacen de certificados del sistema.
+    Sirve cuando Python no confia en el certificado (Windows recien instalado: aun no ha bajado las raices). La verificacion TLS sigue activa."""
+    curl = shutil.which("curl")
+    if curl:
+        rc = subprocess.call([curl, "-sS", "-L", "-f", "-m", "900", "-o", str(destino), url])
+        if rc == 0:
+            return
+    ps = shutil.which("powershell")
+    if ps:
+        cmd = "$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -UseBasicParsing -Uri '%s' -OutFile '%s'" % (url, destino)
+        if subprocess.call([ps, "-NoProfile", "-Command", cmd]) == 0:
+            return
+    raise OSError("ni curl.exe ni PowerShell pudieron descargar %s" % url)
+
+
+def descargar(url, destino, tam_min=1_000_000):
+    """Descarga url en destino; devuelve (bytes, sha256). Lanza OSError/ValueError si falla o es demasiado pequeno.
+    Si Python no valida el certificado TLS, reintenta con las herramientas de Windows (sin desactivar nunca la verificacion)."""
+    try:
+        h = hashlib.sha256()
+        n = 0
+        with urllib.request.urlopen(url, timeout=60) as r, open(destino, "wb") as f:
+            while True:
+                trozo = r.read(1 << 20)
+                if not trozo:
+                    break
+                f.write(trozo)
+                h.update(trozo)
+                n += len(trozo)
+    except (ssl.SSLError, urllib.error.URLError) as e:
+        motivo = getattr(e, "reason", e)
+        if not isinstance(motivo, ssl.SSLError):
+            raise
+        log("Python no valida el certificado de %s (%s)." % (url.split("/")[2], str(motivo)[:90]))
+        log("Se reintenta con las herramientas de Windows (usan el almacen de certificados del sistema; la verificacion sigue activa).")
+        descargar_con_windows(url, destino)
+        n, sha = sha_y_tamano(destino)
+    else:
+        sha = h.hexdigest()
     if n < tam_min:
         raise ValueError("descarga demasiado pequena (%d bytes): no parece un instalador" % n)
-    return n, h.hexdigest()
+    return n, sha
 
 
 def instalar():

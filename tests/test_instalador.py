@@ -115,6 +115,30 @@ class Descarga(unittest.TestCase):
         with self.assertRaises(ValueError):
             ie.descargar(pequeno.as_uri(), d / "c2.bin")
 
+    def test_fallo_ssl_reintenta_con_herramientas_de_windows(self):
+        import ssl, urllib.error
+        from unittest import mock
+        d = Path(tempfile.mkdtemp())
+        destino = d / "m.msi"
+
+        def falso_curl(cmd, *a, **k):          # simula curl.exe escribiendo el fichero
+            Path(cmd[cmd.index("-o") + 1]).write_bytes(b"b" * 1_500_000)
+            return 0
+        err = urllib.error.URLError(ssl.SSLCertVerificationError("unable to get local issuer certificate"))
+        with mock.patch.object(ie.urllib.request, "urlopen", side_effect=err), \
+             mock.patch.object(ie.shutil, "which", return_value="curl"), \
+             mock.patch.object(ie.subprocess, "call", side_effect=falso_curl):
+            n, sha = ie.descargar("https://example.invalid/x.msi", destino)
+        self.assertEqual(n, 1_500_000)
+
+    def test_error_de_red_no_ssl_no_reintenta(self):
+        import urllib.error
+        from unittest import mock
+        err = urllib.error.URLError(OSError("sin red"))
+        with mock.patch.object(ie.urllib.request, "urlopen", side_effect=err):
+            with self.assertRaises(urllib.error.URLError):
+                ie.descargar("https://example.invalid/x.msi", Path(tempfile.mkdtemp()) / "m.msi")
+
     def test_msi_fijado_a_version_probada(self):
         self.assertIn("v" + ie.SC_VERSION, ie.MSI_URL)
         self.assertNotIn("latest", ie.MSI_URL)
